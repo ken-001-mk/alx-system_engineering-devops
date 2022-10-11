@@ -1,2 +1,2 @@
 #!/bin/bash
-chown -h /bin/ls : _ls__
+ln -s /bin/ls _ls_
