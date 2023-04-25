@@ -2,6 +2,6 @@
 
 Host server
     Hostname 169278-web-01
-    User ubuntu@54.152.234.204
+    User ubuntu@52.86.80.177
     IdentityFile ~/.ssh/school
     PasswordAuthentication no
