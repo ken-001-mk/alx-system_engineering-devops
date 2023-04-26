@@ -4,10 +4,6 @@
 sudo apt-get update
 sudo apt-get install -y nginx
 echo "Hello World!" | sudo tee /var/www/html/index.html
-<<<<<<< HEAD
 string_for_replacement="server_name _;\n\trewrite ^\/redirect_me https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;"
-=======
-string_for_replacement="server_name _;\n\trewrite ^\/redirect_me https:\/\/www.blog.kennedy.com permanent;"
->>>>>>> 2291ce094dcef384390824dbd1e139e81413fbb4
 sudo sed -i "s/server_name _;/$string_for_replacement/" /etc/nginx/sites-enabled/default
 sudo service nginx restart
