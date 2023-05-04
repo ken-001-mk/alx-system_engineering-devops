@@ -1,38 +1,15 @@
 #Puppet script that automate task of creating a custom HTTP header response
-class nginx {
-  package { 'nginx':
-    ensure => 'installed',
-  }
-
-  service { 'nginx':
-    ensure => 'running',
-    enable => true,
-  }
-
-  file { '/etc/nginx/sites-available/default':
-    ensure  => 'file',
-    content => template('nginx/default.conf.erb'),
-    notify  => Service['nginx'],
-  }
+exec {'update':
+  command => '/usr/bin/apt-get update',
 }
-
-class nginx::headers {
-  file { '/etc/nginx/conf.d/custom-headers.conf':
-    ensure  => 'file',
-    content => template('nginx/custom-headers.conf.erb'),
-    notify  => Service['nginx'],
-  }
+-> package {'nginx':
+  ensure => 'present',
 }
-
-class nginx::headers::params {
-  $hostname = $::hostname
-
-  file { '/etc/nginx/conf.d/custom-headers.conf':
-    content => template('nginx/custom-headers.conf.erb'),
-    notify  => Service['nginx'],
-  }
+-> file_line { 'http_header':
+  path  => '/etc/nginx/nginx.conf',
+  match => 'http {',
+  line  => "http {\n\tadd_header X-Served-By \"${hostname}\";",
 }
-
-include nginx
-include nginx::headers
-include nginx::headers::params
+-> exec {'run':
+  command => '/usr/sbin/service nginx restart',
+}
