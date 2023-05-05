@@ -20,7 +20,7 @@ frontend http-in
 backend servers
    mode http
    balance roundrobin
-   server 169278-web-01 52.86.80.177:80 check
+   server 169278-web-01 54.227.128.48:80 check
    server 169278-web-02 100.25.119.208:80 check
 "
 echo "$server_config" | sudo tee -a /etc/haproxy/haproxy.cfg
