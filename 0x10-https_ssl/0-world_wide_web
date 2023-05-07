@@ -5,7 +5,7 @@ function get_record_info {
   local domain=$1
   local subdomain=$2
   local record_info=$(dig +short $subdomain.$domain | awk '{print $1}')
-  local record_type=$(dig $subdomain.$domain | awk '/ANSWER SECTION/{getline; print $1}')
+  local record_type=$(dig $subdomain.$domain | awk '/ANSWER SECTION/{getline; print $2}')
   echo "The subdomain $subdomain is a $record_type record and points to $record_info"
 }
 
