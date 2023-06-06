@@ -4,46 +4,37 @@
 parses the title of all hot articles
 prints a sorted count of given keywords
 """
-
 import requests
 
-def count_words(subreddit, word_list, after=None, counts=None):
-    if counts is None:
-        counts = {}
-        
+
+def count_words(subreddit, word_list, found_list=[], after=None):
+    '''return count of keywords in hot posts titles'''
+    user_agent = {'User-agent': 'test45'}
+    posts = requests.get('http://www.reddit.com/r/{}/hot.json?after={}'
+                         .format(subreddit, after), headers=user_agent)
     if after is None:
-        url = f"https://www.reddit.com/r/{subreddit}/hot.json"
-    else:
-        url = f"https://www.reddit.com/r/{subreddit}/hot.json?after={after}"
-    
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-    }
-    
-    response = requests.get(url, headers=headers)
-    data = response.json()
-    
-    if "error" in data or "data" not in data:
-        print("Invalid subreddit or no posts match.")
-        return
-    
-    posts = data["data"]["children"]
-    
-    for post in posts:
-        title = post["data"]["title"].lower()
-        
-        for word in word_list:
-            word_lower = word.lower()
-            if word_lower in title and not title.startswith(word_lower + ".") and not title.startswith(word_lower + "!") and not title.startswith(word_lower + "_"):
-                if word_lower in counts:
-                    counts[word_lower] += 1
+        word_list = [word.lower() for word in word_list]
+
+    if posts.status_code == 200:
+        posts = posts.json()['data']
+        aft = posts['after']
+        posts = posts['children']
+        for post in posts:
+            title = post['data']['title'].lower()
+            for word in title.split(' '):
+                if word in word_list:
+                    found_list.append(word)
+        if aft is not None:
+            count_words(subreddit, word_list, found_list, aft)
+        else:
+            result = {}
+            for word in found_list:
+                if word.lower() in result.keys():
+                    result[word.lower()] += 1
                 else:
-                    counts[word_lower] = 1
-    
-    if data["data"]["after"] is not None:
-        count_words(subreddit, word_list, after=data["data"]["after"], counts=counts)
+                    result[word.lower()] = 1
+            for key, value in sorted(result.items(), key=lambda item: item[1],
+                                     reverse=True):
+                print('{}: {}'.format(key, value))
     else:
-        sorted_counts = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
-        
-        for word, count in sorted_counts:
-            print(f"{word}: {count}")
+        return
