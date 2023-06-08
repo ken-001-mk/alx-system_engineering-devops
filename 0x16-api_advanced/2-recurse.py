@@ -6,33 +6,22 @@ the titles of all hot articles for a given subreddit
 
 import requests
 
-def recurse(subreddit, hot_list=None, after=None):
-    if hot_list is None:
-        hot_list = []
-    
-    headers = {'User-Agent': 'Recursive Reddit Scraper'}
-    url = f'https://www.reddit.com/r/{subreddit}/hot.json'
-    params = {'limit': 100, 'after': after}
-    
-    response = requests.get(url, headers=headers, params=params)
-    
-    if response.status_code == 200:
-        data = response.json()
-        posts = data['data']['children']
-        
-        if len(posts) == 0:
-            return hot_list if hot_list else None
-        
-        for post in posts:
-            hot_list.append(post['data']['title'])
-        
-        after = data['data']['after']
-        
-        if after is not None:
-            return recurse(subreddit, hot_list, after)
-        else:
-            return hot_list
-    elif response.status_code == 404:
-        return None
+def recurse(subreddit, hot_list=[] after = None):
+    global after
+    user_agent = {'User-Agent': 'api_advanced-project'}
+    url = "https://www.reddit.com/r/{}/hot.json".format(subreddit)
+    parameters = {'after': after}
+    results = requests.get(url, params=parameters, headers=user_agent,
+                           allow_redirects=False)
+
+    if results.status_code == 200:
+        after_data = results.json().get("data").get("after")
+        if after_data is not None:
+            after = after_data
+            recurse(subreddit, hot_list)
+        all_titles = results.json().get("data").get("children")
+        for title_ in all_titles:
+            hot_list.append(title_.get("data").get("title"))
+        return hot_list
     else:
-        raise Exception(f"An error occurred: {response.status_code}")
+        return (None)
